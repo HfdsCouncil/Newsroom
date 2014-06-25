@@ -1,0 +1,19 @@
+﻿<%@ Master Language="C#" MasterPageFile="~/umbraco/masterpages/default.master" AutoEventWireup="true" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolderDefault" runat="server">
+  <link href="/css/newsroom.css" rel="stylesheet" />
+  <div class="newsroom" id="newsroom-body">
+    <umbraco:Macro ID="NewsroomMacro1" Alias="NewsroomBreadcrumbs" runat="server" />
+    <section class="newsroom-leftCol">
+      <asp:ContentPlaceHolder ID="NewsroomMaster" runat="server" />
+    </section>
+    <aside class="newsroom newsroom-rightCol">
+      <umbraco:Macro ID="NewsroomMacro2" Alias="NewsroomListPhotos" runat="server" />
+      <umbraco:Macro ID="NewsroomMacro3" Alias="NewsroomListArchives" runat="server" />
+      <umbraco:Macro ID="NewsroomMacro4" Alias="NewsroomListCategories" runat="server" />
+      <umbraco:Macro ID="NewsroomMacro5" Alias="NewsroomListGallery" runat="server" />
+      <umbraco:Macro ID="NewsroomMacro6" Alias="NewsroomListRelatedArticles" runat="server" />
+      <umbraco:Macro ID="NewsroomMacro7" Alias="NewsroomListInformationPages" runat="server" />
+    </aside>
+  </div>
+</asp:Content>

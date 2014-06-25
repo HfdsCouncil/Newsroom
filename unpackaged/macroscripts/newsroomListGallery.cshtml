@@ -1,0 +1,30 @@
+﻿@using umbraco.MacroEngines
+@inherits umbraco.MacroEngines.DynamicNodeContext
+@{
+  var rootnode = Model.AncestorOrSelf(1);
+  var newsroomRoot = rootnode.Descendants("NewsroomHome").Count() > 0 ? rootnode.Descendants("NewsroomHome")[0] : rootnode;
+
+  if (Model.NodeTypeAlias != "NewsroomPressRelease")
+  {
+    var Photos = newsroomRoot.newsroomGalleryPhotos;
+    if (Photos != null && Photos.Items.Count > 0)
+    {
+      <aside class="island">
+        <header>
+          <h3>Gallery</h3>
+        </header>
+        <ul id="newsroom-gallery">
+          @foreach (var item in Photos.Items)
+          {
+	           @* List all of the images from the imagepicker control *@
+            <li>
+              <a href="@item.Url">
+                <img src="/ImageGen.ashx?image=@item.Url&width=64&height=64" alt="@item.Title" title="@item.Title">
+              </a>
+            </li>
+          }
+        </ul>
+      </aside>
+    }
+  }
+}

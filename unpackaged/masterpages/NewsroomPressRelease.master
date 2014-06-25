@@ -1,0 +1,15 @@
+﻿<%@ Master Language="C#" MasterPageFile="~/masterpages/NewsroomMaster.master" AutoEventWireup="true" %>
+
+<asp:Content ContentPlaceHolderID="NewsroomMaster" runat="server">	
+	
+	<header>
+		<h2><umbraco:Item field="pageName" runat="server" /></h2>
+	</header>
+	<time>
+		<p><umbraco:Item useIfEmpty="createDate" field="date" formatAsDate="true" runat="server" /></p>
+	</time>
+	<article>			
+		<umbraco:Item field="newsroomBodyText" runat="server" />
+	</article>
+	<umbraco:Macro Alias="NewsroomListArticleCategories" runat="server"></umbraco:Macro>
+</asp:Content>

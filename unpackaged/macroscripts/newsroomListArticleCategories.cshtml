@@ -1,0 +1,22 @@
+﻿@using umbraco.MacroEngines
+@inherits umbraco.MacroEngines.DynamicNodeContext
+	@{
+		@* NodePicker sometimes returns xml instead of string if its empty *@
+		if (Model.newsroomCategories.GetType() == typeof(string) && Model.newsroomCategories.Length > 0)
+		{
+			IEnumerable<DynamicNode> PublishedNodeList = Library.NodesById(Model.newsroomCategories.Split(','));        
+			PublishedNodeList = PublishedNodeList.Where(x => x.GetType() != typeof(DynamicNull) && x.Id > 0);                        
+			dynamic multiNodeTreePicker = new DynamicNodeList(PublishedNodeList);
+			if (multiNodeTreePicker.Any())			
+			{
+				<p><i>Tags: 
+				@foreach (var item in multiNodeTreePicker.Where("Visible"))
+				{
+					@* List all of the urls from the urlpicker control *@
+					@item.Name
+						if(item.Id != (multiNodeTreePicker.Where("Visible").Last().Id)){<text>, </text>}
+				}
+				</i></p>
+			}
+		}
+	}

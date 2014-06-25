@@ -1,0 +1,36 @@
+﻿@using umbraco.MacroEngines
+@inherits umbraco.MacroEngines.DynamicNodeContext
+@using umbraco.cms.businesslogic.web
+@using umbraco.BusinessLogic
+@{
+	@* NodePicker sometimes returns xml instead of string if its empty *@
+  if ((Model.newsroomRelatedPages.GetType() == typeof(string) && Model.newsroomRelatedPages.Length > 0))
+  {
+    IEnumerable<DynamicNode> PublishedNodeList;
+    PublishedNodeList = Library.NodesById(Model.newsroomRelatedPages.Split(','));
+    PublishedNodeList = PublishedNodeList.Where(x => x.GetType() != typeof(DynamicNull) && x.Id > 0);
+    dynamic multiNodeTreePicker = new DynamicNodeList(PublishedNodeList);
+    if (multiNodeTreePicker.Any())
+    {
+			<aside class="island">
+			<header>
+				<h3>Related Articles</h3>
+			</header>
+				<ul>
+					@foreach (var item in multiNodeTreePicker.Where("Visible"))
+     {
+						@* List all of the urls from the urlpicker control *@
+       if (item.NodeTypeAlias == "NewsroomExternalLink")
+       {
+							<li><a href="@item.newsroomLinkData.Url" title="@item.newsroomLinkData.Title">@item.Name</a></li>	
+       }
+       else
+       {
+							<li><a href="@item.Url" title="@item.newsroomLinkData.Title">@item.Name</a></li>	
+       }
+     }
+				</ul>
+			</aside>
+    }
+  }
+}

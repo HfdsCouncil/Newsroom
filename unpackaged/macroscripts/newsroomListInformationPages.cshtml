@@ -1,0 +1,19 @@
+﻿@{
+  var rootnode = Model.AncestorOrSelf(1);
+  var newsroomRoot = rootnode.Descendants("NewsroomHome").Count() > 0 ? rootnode.Descendants("NewsroomHome")[0] : rootnode;
+}
+
+@if (newsroomRoot.Descendants("NewsroomInformationPage").Count() > 0)
+{ 
+  <aside class="island">
+    <header>
+      <h3>Information</h3>
+    </header>
+    <ul>
+      @foreach (var page in newsroomRoot.Descendants("NewsroomInformationPage"))
+      {
+        <li><a href="@page.Url" title="@page.pageName">@page.pageName</a></li>
+      }
+    </ul>
+  </aside>
+}

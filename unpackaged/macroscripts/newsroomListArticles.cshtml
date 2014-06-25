@@ -1,0 +1,76 @@
+﻿@using umbraco.cms.businesslogic.Tags
+@using umbraco.MacroEngines
+@using System.Linq
+@using uComponents.DataTypes.UrlPicker.Dto
+<div class="article-list">
+
+@{
+  var rootnode = Model.AncestorOrSelf(1);
+  var newsroomRoot = rootnode.Descendants("NewsroomHome").Count() > 0 ? rootnode.Descendants("NewsroomHome")[0] : rootnode;
+
+	@* Default - picks 10 newest stories *@
+  IEnumerable<DynamicNode> articles = Model.XPath(".//NewsroomPressRelease").Where("Visible").OrderBy("newsroomDate desc").Take(10);
+  int tagAge;
+  if (!int.TryParse(Model.newsroomTagAge, out tagAge))
+  {
+    tagAge = 30;
+  }
+
+  DateTime tagExpiryDate = DateTime.Now.AddDays(-tagAge);
+  
+	@* if the user is looking at a specific month, select ALL articles instead of just 10 *@
+  if (Model.NodeTypeAlias == "NewsroomArchiveMonth")
+  {
+    articles = Model.Descendants("NewsroomPressRelease").OrderBy("newsroomDate desc");
+  }
+  if (Request["Category"] != null)
+  {
+    var Cat = Request["Category"];
+    var Category = newsroomRoot.Descendants("NewsroomCategories")[0].Children.Where("Visible && Name == \"" + @Cat + "\"");
+    if (Category.Count() > 0)
+    {
+      var CatId = Category[0].Id;
+      articles = newsroomRoot.Descendants().Where("categories.Contains(\"" + @CatId + "\")").OrderBy("date desc");
+
+      if (newsroomRoot.Id == Model.Id)
+      {
+        articles = articles.Where(relevantPage => (DateTime)((dynamic)relevantPage).newsroomDate > tagExpiryDate);
+      }
+    }
+    else
+    {
+      articles = null;
+    }
+  }
+}
+
+@foreach (var article in articles)
+{
+	<article>
+		<div>
+			<header>
+				<h3><a href="@article.Url">@article.Name</a></h3>
+			</header>
+			<p>
+			@* We output two different date formats, one for users and one for crawlers *@
+			@{
+  string pubdate = Convert.ToDateTime(article.GetPropertyValue("newsroomDate")).ToString("yyyy-MM-dd hh:MM:sszz00");
+  string pubdateView = Convert.ToDateTime(article.GetPropertyValue("newsroomDate")).ToString("dd MMM yyyy");
+			}
+				<time datetime="@pubdate">@pubdateView</time>
+			</p>
+      @if (article.HasValue("newsroomSummaryImage"))
+      {
+        var summaryImage = UrlPickerState.Deserialize(article.GetPropertyValue("newsroomSummaryImage"));
+        if(summaryImage.Url.Length > 0)
+        {
+      				<img src="/ImageGen.ashx?image=@summaryImage.Url&constrain=true&width=800" title="@summaryImage.Title" alt="@summaryImage.Title"/>
+        }
+      }
+			<p>@article.GetPropertyValue("newsroomSummaryText")</p>
+      <p><a href="@article.Url">Read more <span class="visually-hidden">about @article.Name</span></a></p>
+		</div>
+	</article>
+  <hr />
+}
+</div>

@@ -1,0 +1,48 @@
+﻿<aside class="island">
+  <header>
+    <h3>News archive</h3>
+  </header>
+  <ul>
+    @{
+      var rootnode = Model.AncestorOrSelf(1);
+      var newsroomRoot = rootnode.Descendants("NewsroomHome").Count() > 0 ? rootnode.Descendants("NewsroomHome")[0] : rootnode;
+    }
+    @if (Model.NodeTypeAlias != "NewsroomArchiveYear" && Model.NodeTypeAlias != "NewsroomArchiveMonth")
+    {
+      @* if we are not looking at the archive, just put a link to the latest year *@
+      var currentYear = DateTime.Now.Year.ToString();
+      var yearNodes = newsroomRoot.Descendants("NewsroomArchiveYear").OrderBy("pageName desc");
+      foreach (var year in yearNodes)
+      {
+        if (year.Descendants("NewsroomPressRelease").Count() > 0)
+        {
+      <li><a href="@year.Url">Archives</a></li>
+          break;
+        }
+      }
+    }
+    else
+    {
+      foreach (var year in newsroomRoot.Descendants("NewsroomArchiveYear").OrderBy("pageName desc"))
+      {
+        if (year.Descendants("NewsroomPressRelease").Count() > 0)
+        {
+      <li><a href="@year.Url" title="Link to @year.pageName">@year.pageName (@year.Descendants("NewsroomPressRelease").Count())</a></li>
+          if (Model.Parent.Id == year.Id || Model.Id == year.Id)
+          {
+            <ul>
+              @foreach (var month in year.Descendants("NewsroomArchiveMonth"))
+              {
+                @* Loop through the months for the selected year only *@
+                if (month.Descendants("NewsroomPressRelease").Count() > 0)
+                {
+                <li><a href="@month.Url" title="Link to @month.pageName">@month.pageName (@month.Children.Count())</a></li>
+                }
+              }
+            </ul>
+          }
+        }
+      }
+    }
+  </ul>
+</aside>

@@ -1,0 +1,72 @@
+﻿@using umbraco.NodeFactory
+@using umbraco.MacroEngines
+@using System.Collections;
+@using System.Linq;
+@inherits umbraco.MacroEngines.DynamicNodeContext
+
+@if (Model.NodeTypeAlias != "NewsroomPressRelease" &&
+ Model.Descendants("NewsroomPressRelease").Count() > 0 &&
+    Request.QueryString["node"] == null)
+{
+  string tagList = "";
+
+  Hashtable nameToId = new Hashtable();
+
+  IEnumerable<DynamicNode> relevantPages = Model.Descendants("NewsroomPressRelease").ToList();
+  int tagAge;
+  if (!int.TryParse(Model.newsroomTagAge, out tagAge))
+  {
+    tagAge = 30;
+  }
+
+  DateTime tagExpiryDate = DateTime.Now.AddDays(-tagAge);
+  if (Model.NodeTypeAlias == "NewsroomHome")
+  {
+    relevantPages = relevantPages.Where(relevantPage => (DateTime)((dynamic)relevantPage).newsroomDate > tagExpiryDate);
+  }
+
+  foreach (dynamic page in relevantPages)
+  {
+    if (page.HasValue("newsroomCategories"))
+    {
+      foreach (string tag in page.newsroomCategories.Split(','))
+      {
+        string newTagName = new Node(Convert.ToInt32(tag)).Name;
+        tagList += newTagName + ",";
+
+        if (!nameToId.ContainsKey(newTagName))
+        {
+          nameToId.Add(newTagName, tag);
+        }
+      }
+    }
+  }
+
+
+  if (tagList.Count() > 0)
+  {
+	@* cut off last character (an excess comma) *@
+    tagList = tagList.Substring(0, tagList.Length - 1);
+    var tagArray = tagList.Split(',');
+    tagArray = tagArray.Distinct().ToArray();
+    Array.Sort(tagArray, StringComparer.InvariantCulture);
+
+  <aside class="island">
+    <header>
+      <h3><i class="s m rs related-pages"></i>Categories</h3>
+    </header>
+    <ul>
+      @foreach (var tag in tagArray)
+      {
+        var tagCount = ((DynamicNodeList)Model.Descendants(2)).Cast<dynamic>()
+             .Where((relevantPage => ((DateTime)(relevantPage.newsroomDate) > tagExpiryDate
+                                    || Model.NodeTypeAlias !="NewsroomHome" )
+                                    && relevantPage.newsroomCategories.Contains(nameToId[tag].ToString())))
+             .Count();
+
+        <li><a href="?Category=@tag" title="Link to @tag">@tag (@tagCount)</a></li>
+      }
+    </ul>
+  </aside>
+  }
+}

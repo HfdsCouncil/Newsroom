@@ -1,0 +1,26 @@
+﻿
+		@{var PageTitle = Model.pageName;var Description = Model.newsroomBodyText;}
+		@if(Request["Category"] != null)
+		{
+			PageTitle = Request["Category"];
+			Description = "This page lists all articles tagged with \""+@PageTitle+"\"";
+			PageTitle = Model.pageName + " - Category: " + PageTitle;
+		}
+
+		<header>
+			<h2>
+				@PageTitle
+			</h2>
+		</header>
+		<article>
+			@if(Request["Category"] != null)
+			{
+				<p>
+					@Description
+				</p>
+			}
+			else
+			{
+				@Description	
+			}
+		</article>

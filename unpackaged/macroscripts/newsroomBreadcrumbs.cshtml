@@ -1,0 +1,12 @@
+﻿@if (Model.Level != 1)
+{
+	<nav id="newsroom-breadCrumb">
+		<ol class="horizontal-list breadcrumb">
+			@foreach (var page in Model.Ancestors().OrderBy("Level"))
+   {
+				<li><a href="@page.Url">@page.Name</a></li>		
+   }
+			<li>@Model.Name</li>
+		</ol>
+	</nav>
+}
