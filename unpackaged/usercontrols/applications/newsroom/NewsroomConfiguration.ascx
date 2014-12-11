@@ -1,6 +1,7 @@
 <%@ Control Language="C#" ClassName="NewsroomConfiguration" %>
 <%@ Import Namespace="System.IO" %>
 <%@ Import Namespace="umbraco.cms.businesslogic.template" %>
+<%@ Import Namespace="Umbraco.Core" %>
 <asp:Label ID="output" runat="server"></asp:Label>
 <script runat="server">
   private string GetLocalPathFromTemplateAlias(string alias)
@@ -31,14 +32,6 @@
     output.Text += "<p>Thank you for installing Newsroom. We just need to configure a few things to get this up and running. This dashboard can be opened later from the Settings section.</p>";
     output.Text += "<p>You may need to restart the website for this package to function correctly if you have just installed it.</p>";
     output.Text += "<p>This tab will contain more things such as a guide and toggleable features soon.</p>";
-    //----------------------------------------------------------------------------------------------------------------    
-    //output.Text += "<div class='dashboardColWrapper'><div class='dashboardCols'><div class='dashboardCol'>";
-    //output.Text += "<label for='test'>Test setting</label>";
-    //string testChecked = true ? " checked='checked'" : "";//hook up to config file
-    //output.Text += "<input id='test' name='test' type='checkbox' " + testChecked + "/><br/>";
-    //output.Text += "<p>This does nothing yet</p>";
-    //output.Text += "</div></div></div>";
-    //----------------------------------------------------------------------------------------------------------------    
     if (Request.Form["submit"] != null)
     {
       //if (Request.Form["test"] == "on")
@@ -60,17 +53,18 @@
         string[] templateLines = mainTemplate.Design.Split('\n');
         if (masterPage != "NONE")
         {
-          Template masterTemplate = Template.GetAllAsList().Where(x => x.Alias == masterPage).FirstOrDefault();
+          Template masterTemplate = Template.GetAllAsList().FirstOrDefault(x => x.Alias == masterPage);
           mainTemplate.MasterTemplate = masterTemplate.Id;
-          templateLines[0] = Regex.Replace(templateLines[0], "MasterPageFile=\"(.*)\"", "MasterPageFile=\"" + GetLocalPathFromTemplateAlias(masterPage) + "\"");
+          templateLines[0] = Regex.Replace(templateLines[0], "MasterPageFile=\"(.*?)\"", "MasterPageFile=\"" + GetLocalPathFromTemplateAlias(masterPage) + "\"");
         }
         else
         {
           mainTemplate.MasterTemplate = 0;
           mainTemplate.contentPlaceholderIds()[0] = "ContentPlaceHolderDefault";
-          templateLines[0] = templateLines[0] = Regex.Replace(templateLines[0], "MasterPageFile=\"(.*)\"", "MasterPageFile=\"~/umbraco/masterpages/default.master\"");
+          templateLines[0] = templateLines[0] = Regex.Replace(templateLines[0], "MasterPageFile=\"(.*?)\"", "MasterPageFile=\"~/umbraco/masterpages/default.master\"");
         }
-        templateLines[2] = Regex.Replace(templateLines[2], "ContentPlaceHolderID\"(.*)\"", "ContentPlaceHolderID=\"" + placeholder + "\"");
+        
+        templateLines[2] = Regex.Replace(templateLines[2], "ContentPlaceHolderID=\"(.*?)\"", "ContentPlaceHolderID=\"" + placeholder + "\"", RegexOptions.IgnoreCase);
         mainTemplate.Design = string.Join("\n", templateLines);
         mainTemplate.Save();
       }

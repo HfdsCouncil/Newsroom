@@ -1,4 +1,5 @@
 ﻿@{
+  Response.ContentType = "text/xml";
   var rootnode = Model.AncestorOrSelf(1);
   var newsroomRoot = rootnode.Descendants("NewsroomHome").Count() > 0 ? rootnode.Descendants("NewsroomHome")[0] : rootnode;
 }
@@ -9,7 +10,7 @@
 				<description>RSS feed for Newsroom</description>
 				<ttl>15</ttl>
 				<link>http://@umbraco.library.RequestServerVariables("HTTP_HOST")@newsroomRoot.Url</link>
-				@foreach (var article in newsroomRoot.Descendants("NewsroomPressRelease").OrderBy("date desc").Take(50))
+				@foreach (var article in newsroomRoot.Descendants("NewsroomPressRelease").OrderBy("newsroomDate desc").Take(50))
 				{
 					<item>
 						<title>@article.pageName</title>
@@ -18,6 +19,7 @@
 						@Html.Raw("</link>")
 						<description>@article.newsroomSummaryText</description>
 						<pubDate>@article.newsroomDate.ToString("ddd, dd MMM yyyy hh:mm:ss zz00")</pubDate>
+      <guid isPermaLink="true">http://@umbraco.library.RequestServerVariables("HTTP_HOST")/@article.Id</guid>
 					</item>
 				}
 			</channel>

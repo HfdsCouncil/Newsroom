@@ -1,6 +1,7 @@
-﻿@using umbraco.cms.businesslogic.Tags
+﻿@using Umbraco.Core
 @using umbraco.MacroEngines
 @using System.Linq
+@using umbraco.presentation.install.utills
 @using uComponents.DataTypes.UrlPicker.Dto
 <div class="article-list">
 
@@ -25,12 +26,11 @@
   }
   if (Request["Category"] != null)
   {
-    var Cat = Request["Category"];
-    var Category = newsroomRoot.Descendants("NewsroomCategories")[0].Children.Where("Visible && Name == \"" + @Cat + "\"");
-    if (Category.Count() > 0)
+    dynamic category = newsroomRoot.Descendants("NewsroomCategories")[0].Children.Where("Visible && Name == \"" + @Request["Category"].StripHtml() + "\"");
+    if (category.Count() > 0)
     {
-      var CatId = Category[0].Id;
-      articles = newsroomRoot.Descendants().Where("categories.Contains(\"" + @CatId + "\")").OrderBy("date desc");
+      var categoryId = category[0].Id;
+      articles = Model.Descendants(2).Where("newsroomCategories.Contains(\"" + categoryId + "\")").OrderBy("date desc");
 
       if (newsroomRoot.Id == Model.Id)
       {
@@ -39,7 +39,7 @@
     }
     else
     {
-      articles = null;
+      articles = new List<DynamicNode>();
     }
   }
 }
@@ -64,11 +64,20 @@
         var summaryImage = UrlPickerState.Deserialize(article.GetPropertyValue("newsroomSummaryImage"));
         if(summaryImage.Url.Length > 0)
         {
-      				<img src="/ImageGen.ashx?image=@summaryImage.Url&constrain=true&width=800" title="@summaryImage.Title" alt="@summaryImage.Title"/>
+      				<img src="/ImageGen.ashx?image=@summaryImage.Url" title="@summaryImage.Title" alt="@summaryImage.Title"/>
         }
       }
-			<p>@article.GetPropertyValue("newsroomSummaryText")</p>
-      <p><a href="@article.Url">Read more <span class="visually-hidden">about @article.Name</span></a></p>
+      @if (string.IsNullOrWhiteSpace(article.GetPropertyValue("newsroomSummaryText")))
+      {
+        string summaryText = article.GetPropertyValue("newsroomBodyText");
+        summaryText = summaryText.Truncate(500, "&hellip;");
+        <p>@Html.Raw(summaryText)</p>
+      }
+      else
+      {
+        <p>@article.GetPropertyValue("newsroomSummaryText")</p>
+      }
+			   <p><a href="@article.Url">Read more <span class="visually-hidden">about @article.Name</span></a></p>
 		</div>
 	</article>
   <hr />

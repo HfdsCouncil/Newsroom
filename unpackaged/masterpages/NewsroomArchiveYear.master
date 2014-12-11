@@ -2,5 +2,5 @@
 
 <asp:Content ContentPlaceHolderID="NewsroomMaster" runat="server">
 	<umbraco:Macro Alias="NewsroomGetPageIntro" runat="server" />
-	<umbraco:Macro Alias="NewsroomlistArticles" runat="server" />
+	<umbraco:Macro Alias="NewsroomlistArticles" Category="[@Category]" runat="server" />
 </asp:Content>
